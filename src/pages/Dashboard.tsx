@@ -16,6 +16,7 @@ function Dashboard() {
   // Designs list states
   const [designs, setDesigns] = useState<DesignListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
@@ -39,9 +40,23 @@ function Dashboard() {
 
   const fetchDesigns = async () => {
     try {
-      setLoading(true);
+      // Only show full-loading on initial load when there are no designs yet
+      if (designs.length === 0) {
+        setLoading(true);
+      } else {
+        // Non-blocking refresh indicator so we don't replace the table UI
+        setRefreshing(true);
+      }
+
       const data = await getDesigns();
-      setDesigns(data);
+
+      // Avoid unnecessary re-renders if data didn't change (reduces table flashing)
+      const dataJson = JSON.stringify(data);
+      const prevJson = JSON.stringify(designs);
+      if (dataJson !== prevJson) {
+        setDesigns(data);
+      }
+
       setListError(null);
     } catch (err: any) {
       console.error("Fetch designs error:", err);
@@ -55,12 +70,14 @@ function Dashboard() {
           err.name === "TypeError")
       ) {
         errorMessage =
-          "Network error: Cannot connect to the server. Make sure the backend server is running on " + API_BASE_URL;
+          "Network error: Cannot connect to the server. Make sure the backend server is running on " +
+          API_BASE_URL;
       }
 
       setListError(errorMessage);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -134,13 +151,16 @@ function Dashboard() {
         errorMessage.includes("took too long")
       ) {
         errorMessage =
-          "Upload timeout: The server is not responding. Please check if the backend server is running on port " + API_BASE_URL.split(":")[2] + ".";
+          "Upload timeout: The server is not responding. Please check if the backend server is running on port " +
+          API_BASE_URL.split(":")[2] +
+          ".";
       } else if (
         errorMessage.includes("Failed to fetch") ||
         errorMessage.includes("network")
       ) {
         errorMessage =
-          "Network error: Cannot connect to the server. Make sure the backend server is running on " + API_BASE_URL;
+          "Network error: Cannot connect to the server. Make sure the backend server is running on " +
+          API_BASE_URL;
       }
 
       setError(errorMessage);
@@ -350,6 +370,7 @@ function Dashboard() {
       <section className="designs-section">
         <div className="designs-header">
           <h2>Saved Designs</h2>
+          {refreshing && <div className="refreshing">Refreshing…</div>}
           {someSelected && (
             <button
               className="delete-selected-btn"
