@@ -9,7 +9,7 @@ export default defineConfig({
     // No proxy for /upload - upload requests go directly to http://localhost:8888/upload
     proxy: {
       "/api": {
-        target: "http://localhost:8888",
+        target: "https://amit-svg.onrender.com",
         changeOrigin: true,
       },
     },
