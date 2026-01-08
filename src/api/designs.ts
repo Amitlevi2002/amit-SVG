@@ -30,14 +30,15 @@ export interface DesignDetails {
   coverageRatio: number;
   issues: Array<"EMPTY" | "OUT_OF_BOUNDS">;
 }
-
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8888";
 export const uploadDesign = async (
   file: File
 ): Promise<{ design: DesignListItem }> => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch("http://localhost:8888/upload", {
+  const response = await fetch(`${API_BASE_URL}/upload`, {
     method: "POST",
     body: formData,
   });
@@ -51,7 +52,7 @@ export const uploadDesign = async (
 };
 
 export const getDesigns = async (): Promise<DesignListItem[]> => {
-  const response = await fetch("http://localhost:8888/api/designs");
+  const response = await fetch(`${API_BASE_URL}/api/designs`);
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -62,7 +63,7 @@ export const getDesigns = async (): Promise<DesignListItem[]> => {
 };
 
 export const getDesignById = async (id: string): Promise<DesignDetails> => {
-  const response = await fetch(`http://localhost:8888/api/designs/${id}`);
+  const response = await fetch(`${API_BASE_URL}/api/designs/${id}`);
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -73,7 +74,7 @@ export const getDesignById = async (id: string): Promise<DesignDetails> => {
 };
 
 export const deleteDesign = async (id: string): Promise<void> => {
-  const response = await fetch(`http://localhost:8888/api/designs/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/api/designs/${id}`, {
     method: "DELETE",
   });
 
