@@ -47,11 +47,12 @@ export const uploadDesign = async (
             `[uploadDesign] ❌ Failed to connect to MongoDB:`,
             connectError.message
           );
-          return res.status(503).json({
+          res.status(503).json({
             error:
               "Database connection failed. Please ensure MongoDB is running.",
             details: connectError.message,
           });
+          return;
         }
       } else {
         // Connection is in progress, wait a bit
@@ -59,10 +60,11 @@ export const uploadDesign = async (
         isConnected = mongoose.connection.readyState === 1;
 
         if (!isConnected) {
-          return res.status(503).json({
+          res.status(503).json({
             error:
               "Database connection not ready. Please try again in a moment.",
           });
+          return;
         }
       }
     }
@@ -81,16 +83,17 @@ export const uploadDesign = async (
     });
 
     try {
-    await design.save();
+      await design.save();
       console.log(
         `[uploadDesign] ✅ Created Design document with ID: ${design._id}`
       );
     } catch (dbError: any) {
       console.error(`[uploadDesign] ❌ Database save error:`, dbError);
-      return res.status(500).json({
+      res.status(500).json({
         error: "Failed to save design to database",
         details: dbError.message,
       });
+      return;
     }
 
     try {
@@ -103,26 +106,27 @@ export const uploadDesign = async (
 
       // Update Design with parsed fields
       if (design) {
-      design.svgWidth = parsedData.svgWidth;
-      design.svgHeight = parsedData.svgHeight;
-      design.items = parsedData.items;
-      design.itemsCount = parsedData.itemsCount;
-      design.coverageRatio = parsedData.coverageRatio;
-      design.issues = parsedData.issues;
-      design.status = "PROCESSED";
+        design.svgWidth = parsedData.svgWidth;
+        design.svgHeight = parsedData.svgHeight;
+        design.items = parsedData.items;
+        design.itemsCount = parsedData.itemsCount;
+        design.coverageRatio = parsedData.coverageRatio;
+        design.issues = parsedData.issues;
+        design.status = "PROCESSED";
 
         try {
-      await design.save();
+          await design.save();
           console.log(`[uploadDesign] ✅ Design updated and saved to MongoDB`);
         } catch (saveError: any) {
           console.error(
             `[uploadDesign] ❌ Failed to save to database:`,
             saveError.message
           );
-          return res.status(500).json({
+          res.status(500).json({
             error: "Failed to save parsed data to database",
             details: saveError.message,
           });
+          return;
         }
       }
 
@@ -139,12 +143,12 @@ export const uploadDesign = async (
       });
     } catch (parseError: any) {
       console.error(`[uploadDesign] ❌ SVG parsing error:`, parseError);
-      
+
       // Set status to ERROR if parsing fails
       if (design) {
         try {
-      design.status = "ERROR";
-      await design.save();
+          design.status = "ERROR";
+          await design.save();
         } catch (saveError) {
           // Ignore save errors
         }
@@ -171,10 +175,11 @@ export const getDesigns = async (
     const isConnected = mongoose.connection.readyState === 1;
 
     if (!isConnected) {
-      return res.status(503).json({
+      res.status(503).json({
         error: "Database not connected",
         designs: [],
       });
+      return;
     }
 
     const designs = await Design.find()
@@ -207,9 +212,10 @@ export const getDesignById = async (
     const isConnected = mongoose.connection.readyState === 1;
 
     if (!isConnected) {
-      return res.status(503).json({
+      res.status(503).json({
         error: "Database not connected",
       });
+      return;
     }
 
     const { id } = req.params;
@@ -266,7 +272,10 @@ export const deleteDesign = async (
       const filePath = path.join(process.cwd(), "uploads", design.filePath);
       fs.unlink(filePath, (err) => {
         if (err) {
-          console.error(`[deleteDesign] Failed to delete file ${filePath}:`, err);
+          console.error(
+            `[deleteDesign] Failed to delete file ${filePath}:`,
+            err
+          );
         } else {
           console.log(`[deleteDesign] Successfully deleted file: ${filePath}`);
         }
