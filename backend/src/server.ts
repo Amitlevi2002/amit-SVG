@@ -22,7 +22,16 @@ app.use(
       // Allow requests from localhost on any port (for development)
       if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
         callback(null, true);
-      } else {
+      }
+      // Allow GitHub Pages
+      else if (origin === 'https://amitlevi2002.github.io') {
+        callback(null, true);
+      }
+      // Allow custom CORS_ORIGIN from env
+      else if (origin === CORS_ORIGIN) {
+        callback(null, true);
+      }
+      else {
         callback(new Error('Not allowed by CORS'));
       }
     },
