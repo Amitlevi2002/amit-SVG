@@ -30,11 +30,10 @@ function Dashboard() {
     };
 
     window.addEventListener("designUploaded", handleUpload);
-    const interval = setInterval(fetchDesigns, 5000);
+    
 
     return () => {
       window.removeEventListener("designUploaded", handleUpload);
-      clearInterval(interval);
     };
   }, []);
 
