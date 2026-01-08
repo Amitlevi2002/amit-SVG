@@ -31,8 +31,7 @@ jobs:
 
       - name: Build
         run: | 
-          cd frontend
-          npm Install 
+          cd frontend 
           npm run build
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
