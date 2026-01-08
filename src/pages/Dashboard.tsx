@@ -5,6 +5,8 @@ import "./Dashboard.css";
 
 function Dashboard() {
   // Upload states
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8888";
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -53,7 +55,7 @@ function Dashboard() {
           err.name === "TypeError")
       ) {
         errorMessage =
-          "Network error: Cannot connect to the server. Make sure the backend server is running on http://localhost:8888";
+          "Network error: Cannot connect to the server. Make sure the backend server is running on " + API_BASE_URL;
       }
 
       setListError(errorMessage);
@@ -91,7 +93,7 @@ function Dashboard() {
         );
       });
 
-      const uploadPromise = fetch("http://localhost:8888/upload", {
+      const uploadPromise = fetch(`${API_BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -132,13 +134,13 @@ function Dashboard() {
         errorMessage.includes("took too long")
       ) {
         errorMessage =
-          "Upload timeout: The server is not responding. Please check if the backend server is running on port 8888.";
+          "Upload timeout: The server is not responding. Please check if the backend server is running on port " + API_BASE_URL.split(":")[2] + ".";
       } else if (
         errorMessage.includes("Failed to fetch") ||
         errorMessage.includes("network")
       ) {
         errorMessage =
-          "Network error: Cannot connect to the server. Make sure the backend server is running on http://localhost:8888";
+          "Network error: Cannot connect to the server. Make sure the backend server is running on " + API_BASE_URL;
       }
 
       setError(errorMessage);
