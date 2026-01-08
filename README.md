@@ -1,5 +1,4 @@
 # SVG Design Frontend
-
 Frontend React application for SVG design management.
 
 ## Setup
